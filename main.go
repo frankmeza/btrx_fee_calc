@@ -46,12 +46,40 @@ func processHistData(histData [][]string) []recordedPrice {
 
 // recordedPrice functions END
 
+// recordedFee functions BEGIN
+
+func createRecordedFee(row []string) recordedFee {
+	record := recordedFee{Date: row[8], Fee: row[5]}
+	return record
+}
+
+func processBtrxData(btrxData [][]string) []recordedFee {
+	var dataContainer []recordedFee
+	for _, row := range btrxData {
+		record := createRecordedFee(row)
+		dataContainer = append(dataContainer, record)
+	}
+	return dataContainer
+}
+
+// recordedFee functions END
+
 func main() {
+	// prices
 	histDataReader := createCsvReader(HistDataBTC)
 	histData, err := histDataReader.ReadAll()
 	if err != nil {
 		log.Fatal(err)
 	}
-	output := processHistData(histData)
-	fmt.Println(output)
+	priceHistory := processHistData(histData)
+	fmt.Println(priceHistory)
+	// fees
+	btrxReader := createCsvReader(BTRX)
+	btrxData, err := btrxReader.ReadAll()
+	if err != nil {
+		log.Fatal(err)
+	}
+	feeHistory := processBtrxData(btrxData)
+	fmt.Println(feeHistory)
+
 }
