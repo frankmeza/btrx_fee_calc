@@ -10,3 +10,9 @@ Things to accomplish
     - in DB?
 
 ### Tier 3
+- readers in place
+    - reading everything: each row as a slice
+
+### next steps
+- get just the low values from the hist data, with the date
+    - capture within a struct
