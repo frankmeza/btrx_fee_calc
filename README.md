@@ -5,14 +5,13 @@ Things to accomplish
 - problem is the moving value of BTC on a given day
 
 ## Tier 2
-- decide how to record BTC price per day
-    - in memory?
-    - in DB?
-
-### Tier 3
 - readers in place
     - reading everything: each row as a slice
+- structs in place
+    - capturing fee{date, commissionPaid}
+    - capturing price{date, price}
 
 ### next steps
-- get just the low values from the hist data, with the date
-    - capture within a struct
+- convert commissionPaid in BTC into USD on that day
+    - make uniform the date structures between fees and price
+    - record `feePaid = commissionPaid / price`
