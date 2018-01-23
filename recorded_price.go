@@ -1,15 +1,17 @@
 package main
 
+import "time"
+
 // recordedPrice is the market value of BTC on a given day
 // example {Date  Low} {Dec 31 2017  12755.60}
 type recordedPrice struct {
-	Date     string
+	Date     time.Time
 	LowPrice string
 }
 
 func createRecordedPrice(row []string) recordedPrice {
-	// get date, lowPrice values from row, create recordedPrice
-	record := recordedPrice{Date: row[0], LowPrice: row[3]}
+	date, _ := time.Parse("1/2/2006", row[0])
+	record := recordedPrice{Date: date, LowPrice: row[3]}
 	return record
 }
 

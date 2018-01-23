@@ -1,14 +1,19 @@
 package main
 
+import (
+	"time"
+)
+
 // recordedFee is the fee paid on a given day
 // example {Closed CommissionPaid} {5/21/2017 8:09:18 AM 0.00041584}
 type recordedFee struct {
-	Date string
+	Date time.Time
 	Fee  string
 }
 
 func createRecordedFee(row []string) recordedFee {
-	record := recordedFee{Date: row[8], Fee: row[5]}
+	date, _ := time.Parse("1/2/2006", row[8])
+	record := recordedFee{Date: date, Fee: row[5]}
 	return record
 }
 
