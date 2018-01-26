@@ -13,13 +13,14 @@ type recordedPrice struct {
 	LowPrice string
 }
 
+// createRecordedPrice :: []string -> recordedPrice
 func createRecordedPrice(row []string) recordedPrice {
 	date, _ := time.Parse("1/2/2006", row[0])
 	record := recordedPrice{Date: date, LowPrice: row[3]}
 	return record
 }
 
-// process getHistDataLowWithDate :: []string -> []recordedPrice
+// processHistData :: [][]string -> []recordedPrice
 func processHistData(histData [][]string) []recordedPrice {
 	var prices []recordedPrice
 	for _, row := range histData {
@@ -29,6 +30,7 @@ func processHistData(histData [][]string) []recordedPrice {
 	return prices
 }
 
+// insertPrices :: []recordedPrice, *mgo.Collection -> void
 func insertPrices(prices []recordedPrice, coll *mgo.Collection) {
 	for _, p := range prices {
 		coll.Insert(&recordedPrice{Date: p.Date, LowPrice: p.LowPrice})

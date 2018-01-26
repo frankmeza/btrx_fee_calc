@@ -13,12 +13,14 @@ type recordedFee struct {
 	Fee  string
 }
 
+// createRecordedFee :: []string -> recordedFee
 func createRecordedFee(row []string) recordedFee {
 	date, _ := time.Parse("1/2/2006", row[8])
 	record := recordedFee{Date: date, Fee: row[5]}
 	return record
 }
 
+// processBtrxData :: [][]string -> []recordedFee
 func processBtrxData(btrxData [][]string) []recordedFee {
 	var fees []recordedFee
 	for _, row := range btrxData {
@@ -28,6 +30,7 @@ func processBtrxData(btrxData [][]string) []recordedFee {
 	return fees
 }
 
+// insertFees :: []recordedFee, *mgo.Collection -> void
 func insertFees(fees []recordedFee, coll *mgo.Collection) {
 	for _, f := range fees {
 		coll.Insert(&recordedFee{Date: f.Date, Fee: f.Fee})
