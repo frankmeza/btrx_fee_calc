@@ -2,6 +2,8 @@ package main
 
 import (
 	"time"
+
+	"gopkg.in/mgo.v2"
 )
 
 // recordedFee is the fee paid on a given day
@@ -24,4 +26,10 @@ func processBtrxData(btrxData [][]string) []recordedFee {
 		fees = append(fees, record)
 	}
 	return fees
+}
+
+func insertFees(fees []recordedFee, coll *mgo.Collection) {
+	for _, f := range fees {
+		coll.Insert(&recordedFee{Date: f.Date, Fee: f.Fee})
+	}
 }

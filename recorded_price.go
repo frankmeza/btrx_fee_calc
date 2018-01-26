@@ -1,6 +1,10 @@
 package main
 
-import "time"
+import (
+	"time"
+
+	mgo "gopkg.in/mgo.v2"
+)
 
 // recordedPrice is the market value of BTC on a given day
 // example {Date  Low} {Dec 31 2017  12755.60}
@@ -23,4 +27,10 @@ func processHistData(histData [][]string) []recordedPrice {
 		prices = append(prices, record)
 	}
 	return prices
+}
+
+func insertPrices(prices []recordedPrice, coll *mgo.Collection) {
+	for _, p := range prices {
+		coll.Insert(&recordedPrice{Date: p.Date, LowPrice: p.LowPrice})
+	}
 }
