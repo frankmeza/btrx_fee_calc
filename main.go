@@ -2,9 +2,10 @@ package main
 
 import (
 	"encoding/csv"
-	"fmt"
 	"log"
 	"strings"
+
+	"gopkg.in/mgo.v2"
 )
 
 // createCsvReader for use with BTRX, HistDataBTC
@@ -14,6 +15,22 @@ func createCsvReader(csvDataString string) *csv.Reader {
 	return r
 }
 
+func insertIntoMongo(fees []recordedFee, prices []recordedPrice) {
+	session, err := mgo.Dial("127.0.0.1")
+	if err != nil {
+		panic(err)
+	}
+
+	feesColl := session.DB("bittrex").C("fees")
+	insertFees(fees, feesColl)
+
+	pricesColl := session.DB("bittrex").C("prices")
+	insertPrices(prices, pricesColl)
+
+	defer session.Close()
+
+}
+
 func main() {
 	// prices
 	histDataReader := createCsvReader(HistDataBTC)
@@ -21,8 +38,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// priceHistory []recordedPrice
 	priceHistory := processHistData(histData)
-	fmt.Println(priceHistory)
+	// fmt.Println(priceHistory)
 
 	// fees
 	btrxReader := createCsvReader(BTRX)
@@ -30,6 +48,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// feeHistory []recordedFee
 	feeHistory := processBtrxData(btrxData)
-	fmt.Println(feeHistory)
+	// fmt.Println(feeHistory)
+
+	insertIntoMongo(feeHistory, priceHistory)
 }
