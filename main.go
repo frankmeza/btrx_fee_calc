@@ -28,29 +28,34 @@ func insertIntoMongo(fees []recordedFee, prices []recordedPrice) {
 	insertPrices(prices, pricesColl)
 
 	defer session.Close()
-
 }
 
 func main() {
+	session, err := mgo.Dial("127.0.0.1")
+	if err != nil {
+		panic(err)
+	}
 	// prices
 	histDataReader := createCsvReader(HistDataBTC)
 	histData, err := histDataReader.ReadAll()
 	if err != nil {
 		log.Fatal(err)
 	}
-	// priceHistory []recordedPrice
-	priceHistory := processHistData(histData)
-	// fmt.Println(priceHistory)
-
 	// fees
 	btrxReader := createCsvReader(BTRX)
 	btrxData, err := btrxReader.ReadAll()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// priceHistory []recordedPrice
+	priceHistory := processHistData(histData)
 	// feeHistory []recordedFee
 	feeHistory := processBtrxData(btrxData)
-	// fmt.Println(feeHistory)
-
+	// insert into DB
 	insertIntoMongo(feeHistory, priceHistory)
+
+	feesColl := session.DB("bittrex").C("fees")
+	pricesColl := session.DB("bittrex").C("prices")
+	crunchTheNumbers(feesColl, pricesColl)
 }

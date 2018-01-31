@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strconv"
+	"strings"
 	"time"
 
 	"gopkg.in/mgo.v2"
@@ -10,13 +12,15 @@ import (
 // example {Closed CommissionPaid} {5/21/2017 8:09:18 AM 0.00041584}
 type recordedFee struct {
 	Date time.Time
-	Fee  string
+	Fee  float64
 }
 
 // createRecordedFee :: []string -> recordedFee
 func createRecordedFee(row []string) recordedFee {
 	date, _ := time.Parse("1/2/2006", row[8])
-	record := recordedFee{Date: date, Fee: row[5]}
+	f := strings.TrimSpace(row[5])
+	fee, _ := strconv.ParseFloat(f, 64)
+	record := recordedFee{Date: date, Fee: fee}
 	return record
 }
 
