@@ -30,14 +30,20 @@ func crunchTheNumbers(feesColl *mgo.Collection, pricesColl *mgo.Collection) {
 		// get fee in btc, date
 		var price recordedPrice
 		err = pricesColl.Find(bson.M{"date": fee.Date}).One(&price)
-
 		usdPaid := fee.Fee * price.LowPrice
-		fmt.Printf("On %v, fee * price was %v * %v \n", fee.Date, fee.Fee, price.LowPrice)
-		fmt.Printf("Today I paid %v \n", usdPaid)
 
+		// increment
 		index++
 		totalBTC += fee.Fee
 		totalUSD += usdPaid
+
+		fmt.Printf("\n")
+		fmt.Printf("On %v\n", fee.Date)
+		fmt.Printf("fee * price was %v * %v \n", fee.Fee, price.LowPrice)
+		fmt.Printf("Today I paid %v \n", usdPaid)
+		fmt.Printf("running total is %v", totalUSD)
+		fmt.Println("= = = = = =")
+
 	}
 
 	fmt.Println("I paid fees this many times", index)
