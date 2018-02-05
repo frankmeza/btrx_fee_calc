@@ -8,11 +8,12 @@ import (
 )
 
 type recordedTotal struct {
-	Total        int
-	NumberOfFees float64
+	NumberOfFees int
+	TotalUSD     float64
+	TotalBTC     float64
 }
 
-func crunchTheNumbers(feesColl *mgo.Collection, pricesColl *mgo.Collection) {
+func crunchTheNumbers(feesColl *mgo.Collection, pricesColl *mgo.Collection) recordedTotal {
 	session, err := mgo.Dial("127.0.0.1")
 	if err != nil {
 		panic(err)
@@ -22,7 +23,7 @@ func crunchTheNumbers(feesColl *mgo.Collection, pricesColl *mgo.Collection) {
 	var fees []recordedFee
 	err = feesColl.Find(nil).All(&fees)
 
-	var index float64
+	var index int
 	var totalUSD float64
 	var totalBTC float64
 
@@ -45,8 +46,14 @@ func crunchTheNumbers(feesColl *mgo.Collection, pricesColl *mgo.Collection) {
 		fmt.Println("= = = = = =")
 
 	}
-
 	fmt.Println("I paid fees this many times", index)
 	fmt.Println("In total, I paid USD", totalUSD)
 	fmt.Println("From BTC", totalBTC)
+
+	record := recordedTotal{
+		NumberOfFees: index,
+		TotalUSD:     totalUSD,
+		TotalBTC:     totalBTC,
+	}
+	return record
 }
