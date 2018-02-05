@@ -15,21 +15,6 @@ func createCsvReader(csvDataString string) *csv.Reader {
 	return r
 }
 
-func insertIntoMongo(fees []recordedFee, prices []recordedPrice) {
-	session, err := mgo.Dial("127.0.0.1")
-	if err != nil {
-		panic(err)
-	}
-
-	feesColl := session.DB("bittrex").C("fees")
-	insertFees(fees, feesColl)
-
-	pricesColl := session.DB("bittrex").C("prices")
-	insertPrices(prices, pricesColl)
-
-	defer session.Close()
-}
-
 func main() {
 	session, err := mgo.Dial("127.0.0.1")
 	if err != nil {
@@ -37,25 +22,35 @@ func main() {
 	}
 	// prices
 	histDataReader := createCsvReader(HistDataBTC)
+	// read the csv into histData
 	histData, err := histDataReader.ReadAll()
 	if err != nil {
 		log.Fatal(err)
 	}
+	// ingress [][]string -> []recordedPrice
+	priceHistory := processHistData(histData)
+	// create a collection
+	pricesColl := session.DB("bittrex").C("prices")
+	// insert priceHistory into mongo collection
+	insertPrices(priceHistory, pricesColl)
+
 	// fees
 	btrxReader := createCsvReader(BTRX)
 	btrxData, err := btrxReader.ReadAll()
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// priceHistory []recordedPrice
-	priceHistory := processHistData(histData)
 	// feeHistory []recordedFee
 	feeHistory := processBtrxData(btrxData)
-	// insert into DB
-	insertIntoMongo(feeHistory, priceHistory)
-
 	feesColl := session.DB("bittrex").C("fees")
-	pricesColl := session.DB("bittrex").C("prices")
-	crunchTheNumbers(feesColl, pricesColl)
+	insertFees(feeHistory, feesColl)
+
+	recordedTotalColl := session.DB("bittrex").C("totals")
+
+	total := crunchTheNumbers(feesColl, pricesColl)
+	recordedTotalColl.Insert(&recordedTotal{
+		NumberOfFees: total.NumberOfFees,
+		TotalUSD:     total.TotalUSD,
+		TotalBTC:     total.TotalBTC,
+	})
 }
