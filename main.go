@@ -40,14 +40,15 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	// feeHistory []recordedFee
 	feeHistory := processBtrxData(btrxData)
 	feesColl := session.DB("bittrex").C("fees")
 	insertFees(feeHistory, feesColl)
 
 	recordedTotalColl := session.DB("bittrex").C("totals")
+	total := getUSDFromBTCHistory(feeHistory, pricesColl)
 
-	total := crunchTheNumbers(feesColl, pricesColl)
 	recordedTotalColl.Insert(&recordedTotal{
 		NumberOfFees: total.NumberOfFees,
 		TotalUSD:     total.TotalUSD,

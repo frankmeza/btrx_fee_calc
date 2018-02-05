@@ -13,42 +13,35 @@ type recordedTotal struct {
 	TotalBTC     float64
 }
 
-func crunchTheNumbers(feesColl *mgo.Collection, pricesColl *mgo.Collection) recordedTotal {
+// func getUSDFromBTCHistory(feesColl *mgo.Collection, pricesColl *mgo.Collection) recordedTotal {
+func getUSDFromBTCHistory(fees []recordedFee, pricesColl *mgo.Collection) recordedTotal {
 	session, err := mgo.Dial("127.0.0.1")
 	if err != nil {
 		panic(err)
 	}
 	defer session.Close()
-	// get all fees from db
-	var fees []recordedFee
-	err = feesColl.Find(nil).All(&fees)
 
 	var index int
 	var totalUSD float64
 	var totalBTC float64
 
 	for _, fee := range fees {
-		// get fee in btc, date
 		var price recordedPrice
+		// get the USD/BTC price for the day that the fee was paid
 		err = pricesColl.Find(bson.M{"date": fee.Date}).One(&price)
 		usdPaid := fee.Fee * price.LowPrice
 
-		// increment
 		index++
 		totalBTC += fee.Fee
 		totalUSD += usdPaid
 
-		fmt.Printf("\n")
 		fmt.Printf("On %v\n", fee.Date)
-		fmt.Printf("fee * price was %v * %v \n", fee.Fee, price.LowPrice)
 		fmt.Printf("Today I paid %v \n", usdPaid)
-		fmt.Printf("running total is %v", totalUSD)
-		fmt.Println("= = = = = =")
-
+		fmt.Printf("fee * price was %v * %v \n", fee.Fee, price.LowPrice)
+		fmt.Printf("running total is %v\n\n", totalUSD)
 	}
-	fmt.Println("I paid fees this many times", index)
-	fmt.Println("In total, I paid USD", totalUSD)
-	fmt.Println("From BTC", totalBTC)
+	fmt.Printf("I paid %v fees", index)
+	fmt.Printf("I paid %v USD from %v BTC", totalUSD, totalBTC)
 
 	record := recordedTotal{
 		NumberOfFees: index,
